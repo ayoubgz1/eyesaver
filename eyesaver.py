@@ -14,6 +14,7 @@ import time
 import argparse
 import subprocess
 import threading
+import webbrowser
 import tkinter as tk
 from tkinter import messagebox
 
@@ -32,15 +33,22 @@ TIPS = [
 ]
 
 def play_sound(sound_name="Ping"):
-    """Play macOS built-in system sound non-blockingly."""
-    sound_path = f"/System/Library/Sounds/{sound_name}.aiff"
-    if os.path.exists(sound_path):
-        def _play():
-            try:
-                subprocess.run(["afplay", sound_path], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-            except Exception:
-                pass
-        threading.Thread(target=_play, daemon=True).start()
+    """Play built-in system sound non-blockingly across macOS, Windows, and Linux."""
+    def _play():
+        try:
+            if sys.platform == "darwin":
+                sound_path = f"/System/Library/Sounds/{sound_name}.aiff"
+                if os.path.exists(sound_path):
+                    subprocess.run(["afplay", sound_path], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+            elif sys.platform == "win32":
+                import winsound
+                if sound_name == "Ping":
+                    winsound.PlaySound("SystemAsterisk", winsound.SND_ALIAS | winsound.SND_ASYNC)
+                else:
+                    winsound.PlaySound("SystemExclamation", winsound.SND_ALIAS | winsound.SND_ASYNC)
+        except Exception:
+            pass
+    threading.Thread(target=_play, daemon=True).start()
 
 
 class EyeSaverApp:
@@ -170,18 +178,34 @@ class EyeSaverApp:
         bottom_frame = tk.Frame(self.root, bg="#12131C", padx=20, pady=8)
         bottom_frame.pack(fill="x", side="bottom")
 
+        unit = "min" if self.work_seconds >= 60 else "sec"
+        work_val = int(self.work_seconds // 60) if self.work_seconds >= 60 else self.work_seconds
         rule_label = tk.Label(
             bottom_frame,
-            text=f"Rule: Every {int(self.work_seconds // 60) if self.work_seconds >= 60 else self.work_seconds} {min if self.work_seconds >= 60 else sec} ➔ {self.break_seconds} sec break",
+            text=f"Rule: Every {work_val} {unit} ➔ {self.break_seconds}s break",
             font=("SF Pro Text", 9),
             fg="#5C6370",
             bg="#12131C"
         )
         rule_label.pack(side="left")
 
+        github_btn = tk.Button(
+            bottom_frame,
+            text="GitHub",
+            command=lambda: webbrowser.open("https://github.com/ayoubgz1/eyesaver"),
+            font=("SF Pro Text", 9),
+            fg="#61AFEF",
+            bg="#12131C",
+            relief="flat",
+            cursor="pointinghand",
+            bd=0,
+            highlightthickness=0
+        )
+        github_btn.pack(side="right", padx=(6, 0))
+
         quit_btn = tk.Button(
             bottom_frame,
-            text="Quit App",
+            text="Quit",
             command=self.quit_app,
             font=("SF Pro Text", 9),
             fg="#E06C75",

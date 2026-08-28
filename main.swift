@@ -244,6 +244,27 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         
         menu.addItem(NSMenuItem.separator())
         
+        // Links & Info Submenu
+        let linksMenu = NSMenu()
+        
+        let githubItem = NSMenuItem(title: "🌐 GitHub Repository", action: #selector(openGitHub), keyEquivalent: "")
+        githubItem.target = self
+        linksMenu.addItem(githubItem)
+        
+        let updatesItem = NSMenuItem(title: "⬇️ Check for Updates", action: #selector(openReleases), keyEquivalent: "")
+        updatesItem.target = self
+        linksMenu.addItem(updatesItem)
+        
+        let aboutItem = NSMenuItem(title: "ℹ️ About 20-20-20 Rule", action: #selector(openAbout), keyEquivalent: "")
+        aboutItem.target = self
+        linksMenu.addItem(aboutItem)
+        
+        let linksSubmenuItem = NSMenuItem(title: "🔗 Links & Info", action: nil, keyEquivalent: "")
+        linksSubmenuItem.submenu = linksMenu
+        menu.addItem(linksSubmenuItem)
+        
+        menu.addItem(NSMenuItem.separator())
+        
         // Quit
         let quitItem = NSMenuItem(title: "❌ Quit EyeSaver", action: #selector(quitApp), keyEquivalent: "q")
         quitItem.target = self
@@ -400,6 +421,24 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         let mins = workTimeRemaining / 60
         let secs = workTimeRemaining % 60
         statusMenuItem.title = String(format: "⏳ Next break in: %02d:%02d", mins, secs)
+    }
+    
+    @objc func openGitHub() {
+        if let url = URL(string: "https://github.com/ayoubgz1/eyesaver") {
+            NSWorkspace.shared.open(url)
+        }
+    }
+    
+    @objc func openReleases() {
+        if let url = URL(string: "https://github.com/ayoubgz1/eyesaver/releases/latest") {
+            NSWorkspace.shared.open(url)
+        }
+    }
+    
+    @objc func openAbout() {
+        if let url = URL(string: "https://github.com/ayoubgz1/eyesaver#readme") {
+            NSWorkspace.shared.open(url)
+        }
     }
     
     @objc func quitApp() {

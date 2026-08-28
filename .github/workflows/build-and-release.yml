@@ -1,0 +1,138 @@
+name: Build and Release EyeSaver
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+jobs:
+  build-macos:
+    name: Build macOS Universal App
+    runs-on: macos-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Compile Universal Swift Binary
+        run: |
+          echo "Compiling for Apple Silicon (arm64)..."
+          swiftc -O -target arm64-apple-macos11.0 -o EyeSaver-arm64 main.swift
+          
+          echo "Compiling for Intel (x86_64)..."
+          swiftc -O -target x86_64-apple-macos11.0 -o EyeSaver-x86_64 main.swift
+          
+          echo "Creating Universal Binary..."
+          lipo -create -output EyeSaver EyeSaver-arm64 EyeSaver-x86_64
+          rm -f EyeSaver-arm64 EyeSaver-x86_64
+
+      - name: Package macOS App Bundle
+        run: |
+          mkdir -p EyeSaver.app/Contents/MacOS
+          mkdir -p EyeSaver.app/Contents/Resources
+          cp EyeSaver EyeSaver.app/Contents/MacOS/
+          
+          # Create Info.plist if not present
+          cat << 'EOF' > EyeSaver.app/Contents/Info.plist
+          <?xml version="1.0" encoding="UTF-8"?>
+          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+          <plist version="1.0">
+          <dict>
+              <key>CFBundleExecutable</key>
+              <string>EyeSaver</string>
+              <key>CFBundleIdentifier</key>
+              <string>com.ayoubgz.eyesaver</string>
+              <key>CFBundleName</key>
+              <string>EyeSaver</string>
+              <key>CFBundlePackageType</key>
+              <string>APPL</string>
+              <key>CFBundleShortVersionString</key>
+              <string>1.0.0</string>
+              <key>LSMinimumSystemVersion</key>
+              <string>11.0</string>
+              <key>LSUIElement</key>
+              <true/>
+              <key>NSHighResolutionCapable</key>
+              <true/>
+          </dict>
+          </plist>
+          EOF
+
+          # Ad-hoc code sign
+          codesign --force --deep -s - EyeSaver.app
+
+      - name: Create Packages (PKG, DMG, ZIP)
+        run: |
+          # ZIP
+          zip -r EyeSaver-v1.0.0-macOS.zip EyeSaver.app
+          
+          # DMG
+          hdiutil create -volname "EyeSaver" -srcfolder EyeSaver.app -ov -format UDZO EyeSaver-v1.0.0.dmg
+          
+          # PKG
+          pkgbuild --root EyeSaver.app --install-location /Applications/EyeSaver.app --identifier com.ayoubgz.eyesaver --version 1.0.0 EyeSaver-v1.0.0.pkg
+
+      - name: Upload macOS Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: macos-binaries
+          path: |
+            EyeSaver-v1.0.0-macOS.zip
+            EyeSaver-v1.0.0.dmg
+            EyeSaver-v1.0.0.pkg
+
+  build-windows:
+    name: Build Windows Native App
+    runs-on: windows-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup .NET 8
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Build Standalone Single-File Windows Executable
+        shell: pwsh
+        run: |
+          cd windows
+          dotnet publish EyeSaver.csproj -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true -o ../dist/windows
+
+      - name: Package Windows Artifacts
+        shell: pwsh
+        run: |
+          Copy-Item "dist/windows/EyeSaver.exe" "EyeSaver.exe"
+          Compress-Archive -Path "dist/windows/EyeSaver.exe" -DestinationPath "EyeSaver-v1.0.0-Windows.zip"
+
+      - name: Upload Windows Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-binaries
+          path: |
+            EyeSaver.exe
+            EyeSaver-v1.0.0-Windows.zip
+
+  release:
+    name: Create GitHub Release
+    needs: [build-macos, build-windows]
+    if: startsWith(github.ref, 'refs/tags/')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Download all built artifacts
+        uses: actions/download-artifact@v4
+
+      - name: Create Release and Upload Assets
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            macos-binaries/EyeSaver-v1.0.0-macOS.zip
+            macos-binaries/EyeSaver-v1.0.0.dmg
+            macos-binaries/EyeSaver-v1.0.0.pkg
+            windows-binaries/EyeSaver.exe
+            windows-binaries/EyeSaver-v1.0.0-Windows.zip
+          draft: false
+          prerelease: false
+          generate_release_notes: true
