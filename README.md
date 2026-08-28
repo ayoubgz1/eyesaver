@@ -40,15 +40,15 @@ Download pre-compiled binaries directly from the **[Releases Page](https://githu
 ### 🍏 macOS Packages
 | Package | Format | Description |
 | :--- | :--- | :--- |
-| 📦 **[EyeSaver-v1.0.0.pkg](https://github.com/ayoubgz1/eyesaver/releases/download/v1.0.0/EyeSaver-v1.0.0.pkg)** | Native PKG Installer | **Recommended for macOS.** Installs via standard macOS wizard without security issues. |
-| 💿 **[EyeSaver-v1.0.0.dmg](https://github.com/ayoubgz1/eyesaver/releases/download/v1.0.0/EyeSaver-v1.0.0.dmg)** | Disk Image | Drag and drop into Applications. |
-| 🗜️ **[EyeSaver-v1.0.0-macOS.zip](https://github.com/ayoubgz1/eyesaver/releases/download/v1.0.0/EyeSaver-v1.0.0-macOS.zip)** | ZIP Archive | Standalone app bundle. |
+| 📦 **[EyeSaver-v1.0.0.pkg](https://github.com/ayoubgz1/eyesaver/releases/latest/download/EyeSaver-v1.0.0.pkg)** | Native PKG Installer | **Recommended for macOS.** Installs via standard macOS wizard without security issues. |
+| 💿 **[EyeSaver-v1.0.0.dmg](https://github.com/ayoubgz1/eyesaver/releases/latest/download/EyeSaver-v1.0.0.dmg)** | Disk Image | Drag and drop into Applications. |
+| 🗜️ **[EyeSaver-v1.0.0-macOS.zip](https://github.com/ayoubgz1/eyesaver/releases/latest/download/EyeSaver-v1.0.0-macOS.zip)** | ZIP Archive | Standalone app bundle. |
 
 ### 🪟 Windows Packages
 | Package | Format | Description |
 | :--- | :--- | :--- |
 | 🚀 **[EyeSaver.exe](https://github.com/ayoubgz1/eyesaver/releases/latest/download/EyeSaver.exe)** | Standalone Executable | **Recommended for Windows.** Single-file standalone executable (Zero install, no dependencies). |
-| 🗜️ **[EyeSaver-v1.0.0-Windows.zip](https://github.com/ayoubgz1/eyesaver/releases/download/v1.0.0/EyeSaver-v1.0.0-Windows.zip)** | ZIP Archive | Portable zip package containing `EyeSaver.exe`. |
+| 🗜️ **[EyeSaver-v1.0.0-Windows.zip](https://github.com/ayoubgz1/eyesaver/releases/latest/download/EyeSaver-v1.0.0-Windows.zip)** | ZIP Archive | Portable zip package containing `EyeSaver.exe`. |
 
 > [!TIP]
 > **macOS Gatekeeper Note:** If you see "App is damaged" or "Cannot be opened" on macOS, run:
