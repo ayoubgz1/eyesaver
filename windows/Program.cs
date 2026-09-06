@@ -81,36 +81,42 @@ namespace EyeSaver
         {
             var menu = new ContextMenuStrip();
             menu.Renderer = new ModernMenuRenderer();
+            menu.Font = new Font("Segoe UI", 9.5f, FontStyle.Regular);
+            menu.Padding = new Padding(2);
 
             // Title
             var titleItem = new ToolStripMenuItem("👁️ EyeSaver (20-20-20 Rule)") { Enabled = false };
-            titleItem.Font = new Font(titleItem.Font, FontStyle.Bold);
+            titleItem.Font = new Font(menu.Font, FontStyle.Bold);
             menu.Items.Add(titleItem);
 
             // Status Countdown
             statusMenuItem = new ToolStripMenuItem("⏳ Next break in: 20:00") { Enabled = false };
+            statusMenuItem.Font = menu.Font;
             menu.Items.Add(statusMenuItem);
 
             menu.Items.Add(new ToolStripSeparator());
 
             // Action Items
-            var takeBreakItem = new ToolStripMenuItem("👁️ Take Break Now", null, (s, e) => TakeBreakNow());
+            var takeBreakItem = new ToolStripMenuItem("👁️ Take Break Now", null, (s, e) => TakeBreakNow()) { Font = menu.Font };
             menu.Items.Add(takeBreakItem);
 
-            pauseMenuItem = new ToolStripMenuItem("⏸️ Pause Timer", null, (s, e) => TogglePause());
+            pauseMenuItem = new ToolStripMenuItem("⏸️ Pause Timer", null, (s, e) => TogglePause()) { Font = menu.Font };
             menu.Items.Add(pauseMenuItem);
 
             menu.Items.Add(new ToolStripSeparator());
 
             // Quick 5s Test
-            var testBreakItem = new ToolStripMenuItem("⚡ Test Quick Break (5s)", null, (s, e) => TestQuickBreak());
+            var testBreakItem = new ToolStripMenuItem("⚡ Test Quick Break (5s)", null, (s, e) => TestQuickBreak()) { Font = menu.Font };
             menu.Items.Add(testBreakItem);
 
             // Intervals Submenu
-            var intervalsMenu = new ToolStripMenuItem("⚙️ Intervals");
-            var d20 = new ToolStripMenuItem("Work: 20m / Break: 20s (Default)", null, (s, e) => SetInterval(20 * 60, 20));
-            var d15 = new ToolStripMenuItem("Work: 15m / Break: 20s", null, (s, e) => SetInterval(15 * 60, 20));
-            var d30 = new ToolStripMenuItem("Work: 30m / Break: 30s", null, (s, e) => SetInterval(30 * 60, 30));
+            var intervalsMenu = new ToolStripMenuItem("⚙️ Intervals") { Font = menu.Font };
+            intervalsMenu.DropDown.Renderer = menu.Renderer;
+            intervalsMenu.DropDown.Font = menu.Font;
+
+            var d20 = new ToolStripMenuItem("Work: 20m / Break: 20s (Default)", null, (s, e) => SetInterval(20 * 60, 20)) { Font = menu.Font };
+            var d15 = new ToolStripMenuItem("Work: 15m / Break: 20s", null, (s, e) => SetInterval(15 * 60, 20)) { Font = menu.Font };
+            var d30 = new ToolStripMenuItem("Work: 30m / Break: 30s", null, (s, e) => SetInterval(30 * 60, 30)) { Font = menu.Font };
             intervalsMenu.DropDownItems.Add(d20);
             intervalsMenu.DropDownItems.Add(d15);
             intervalsMenu.DropDownItems.Add(d30);
@@ -119,17 +125,21 @@ namespace EyeSaver
             // Start with Windows toggle
             startWithWindowsItem = new ToolStripMenuItem("🚀 Start with Windows", null, (s, e) => ToggleStartWithWindows())
             {
-                Checked = IsRunAtStartupEnabled()
+                Checked = IsRunAtStartupEnabled(),
+                Font = menu.Font
             };
             menu.Items.Add(startWithWindowsItem);
 
             menu.Items.Add(new ToolStripSeparator());
 
             // Useful Links
-            var linksMenu = new ToolStripMenuItem("🔗 Links & Info");
-            var githubItem = new ToolStripMenuItem("🌐 GitHub Repository", null, (s, e) => OpenUrl("https://github.com/ayoubgz1/eyesaver"));
-            var updatesItem = new ToolStripMenuItem("⬇️ Check for Updates", null, (s, e) => OpenUrl("https://github.com/ayoubgz1/eyesaver/releases/latest"));
-            var aboutItem = new ToolStripMenuItem("ℹ️ About 20-20-20 Rule", null, (s, e) => OpenUrl("https://github.com/ayoubgz1/eyesaver#readme"));
+            var linksMenu = new ToolStripMenuItem("🔗 Links & Info") { Font = menu.Font };
+            linksMenu.DropDown.Renderer = menu.Renderer;
+            linksMenu.DropDown.Font = menu.Font;
+
+            var githubItem = new ToolStripMenuItem("🌐 GitHub Repository", null, (s, e) => OpenUrl("https://github.com/ayoubgz1/eyesaver")) { Font = menu.Font };
+            var updatesItem = new ToolStripMenuItem("⬇️ Check for Updates", null, (s, e) => OpenUrl("https://github.com/ayoubgz1/eyesaver/releases/latest")) { Font = menu.Font };
+            var aboutItem = new ToolStripMenuItem("ℹ️ About 20-20-20 Rule", null, (s, e) => OpenUrl("https://github.com/ayoubgz1/eyesaver#readme")) { Font = menu.Font };
             linksMenu.DropDownItems.Add(githubItem);
             linksMenu.DropDownItems.Add(updatesItem);
             linksMenu.DropDownItems.Add(aboutItem);
@@ -138,7 +148,7 @@ namespace EyeSaver
             menu.Items.Add(new ToolStripSeparator());
 
             // Exit
-            var exitItem = new ToolStripMenuItem("❌ Exit EyeSaver", null, (s, e) => ExitApp());
+            var exitItem = new ToolStripMenuItem("❌ Exit EyeSaver", null, (s, e) => ExitApp()) { Font = menu.Font };
             menu.Items.Add(exitItem);
 
             return menu;
@@ -451,9 +461,11 @@ namespace EyeSaver
         private int remainingSeconds;
         private int totalBreakSeconds;
         private string currentTip;
+        private readonly Rectangle targetBounds;
 
         public OverlayForm(Rectangle bounds, int remainingSec, int totalBreakSec, string tip)
         {
+            this.targetBounds = bounds;
             this.FormBorderStyle = FormBorderStyle.None;
             this.StartPosition = FormStartPosition.Manual;
             this.Bounds = bounds;
@@ -468,6 +480,29 @@ namespace EyeSaver
             this.currentTip = tip;
 
             this.SetStyle(ControlStyles.AllPaintingInWmPaint | ControlStyles.UserPaint | ControlStyles.OptimizedDoubleBuffer, true);
+        }
+
+        protected override CreateParams CreateParams
+        {
+            get
+            {
+                var cp = base.CreateParams;
+                cp.ExStyle |= 0x80; // WS_EX_TOOLWINDOW: suppress from Alt+Tab
+                return cp;
+            }
+        }
+
+        protected override void OnLoad(EventArgs e)
+        {
+            base.OnLoad(e);
+            this.Bounds = targetBounds;
+        }
+
+        protected override void OnShown(EventArgs e)
+        {
+            base.OnShown(e);
+            this.Bounds = targetBounds;
+            this.BringToFront();
         }
 
         public void UpdateCountdown(int remaining, int total)
@@ -489,126 +524,286 @@ namespace EyeSaver
             var g = e.Graphics;
             g.SmoothingMode = SmoothingMode.AntiAlias;
             g.TextRenderingHint = TextRenderingHint.ClearTypeGridFit;
+            g.InterpolationMode = InterpolationMode.HighQualityBicubic;
 
-            int centerX = this.ClientSize.Width / 2;
-            int centerY = this.ClientSize.Height / 2;
+            float dpiScale = g.DpiY / 96f;
+            if (dpiScale < 0.75f) dpiScale = 1.0f;
 
-            // 1. Emoji / Icon
-            using (var iconFont = new Font("Segoe UI Emoji", 56, FontStyle.Regular))
-            using (var brush = new SolidBrush(Color.White))
+            float clientW = this.ClientSize.Width;
+            float clientH = this.ClientSize.Height;
+            float centerX = clientW / 2f;
+
+            // 1. Prepare typography with DPI-scaled point sizes
+            using var titleFont = new Font("Segoe UI", 36f, FontStyle.Bold);
+            using var subFont = new Font("Segoe UI", 14.5f, FontStyle.Regular);
+            using var countFont = new Font("Segoe UI", 46f, FontStyle.Bold);
+            using var tipTagFont = new Font("Segoe UI", 9f, FontStyle.Bold);
+            using var tipFont = new Font("Segoe UI", 11f, FontStyle.Regular);
+            using var noteFont = new Font("Segoe UI", 9.5f, FontStyle.Regular);
+
+            // 2. Measure elements
+            // Vector Eye Badge size
+            float badgeDiameter = 66f * dpiScale;
+
+            // Title
+            string titleText = "LOOK AWAY";
+            var titleSize = g.MeasureString(titleText, titleFont);
+
+            // Subtitle
+            string subText = "Look at an object at least 20 feet (6 meters) away";
+            var subSize = g.MeasureString(subText, subFont);
+
+            // Countdown Number
+            string countText = $"{remainingSeconds}s";
+            var countSize = g.MeasureString("99s", countFont);
+
+            // Progress Bar dimensions
+            float barWidth = Math.Min(380f * dpiScale, clientW * 0.78f);
+            float barHeight = Math.Max(8f, 8f * dpiScale);
+
+            // Tip Box dimensions
+            float tipBoxWidth = Math.Min(560f * dpiScale, clientW * 0.88f);
+            float tipPaddingX = 22f * dpiScale;
+            float tipPaddingY = 12f * dpiScale;
+            float tipTextWidth = tipBoxWidth - (tipPaddingX * 2f);
+
+            var tipTagSize = g.MeasureString("💡 EYE CARE TIP", tipTagFont);
+            var tipTextSize = g.MeasureString(currentTip, tipFont, (int)tipTextWidth);
+            float tipBoxHeight = tipPaddingY + tipTagSize.Height + (5f * dpiScale) + tipTextSize.Height + tipPaddingY;
+
+            // Footer Note
+            string noteText = "Screen locked for 20 seconds to enforce healthy rest • 20-20-20 Rule";
+            var noteSize = g.MeasureString(noteText, noteFont);
+
+            // 3. Spacing gaps between elements (scaled by DPI)
+            float gapBadge = 14f * dpiScale;
+            float gapTitle = 6f * dpiScale;
+            float gapSub = 18f * dpiScale;
+            float gapCount = 12f * dpiScale;
+            float gapBar = 22f * dpiScale;
+            float gapTip = 20f * dpiScale;
+
+            // 4. Calculate total height of the content stack
+            float totalStackHeight = badgeDiameter + gapBadge
+                                   + titleSize.Height + gapTitle
+                                   + subSize.Height + gapSub
+                                   + countSize.Height + gapCount
+                                   + barHeight + gapBar
+                                   + tipBoxHeight + gapTip
+                                   + noteSize.Height;
+
+            // 5. Screen height fit check (compress proportionally if totalStack exceeds client height)
+            float availableHeight = clientH - (40f * dpiScale);
+            if (totalStackHeight > availableHeight && totalStackHeight > 0f)
             {
-                var iconSize = g.MeasureString("👁️", iconFont);
-                g.DrawString("👁️", iconFont, brush, centerX - iconSize.Width / 2, centerY - 210);
+                float factor = Math.Max(0.55f, availableHeight / totalStackHeight);
+                gapBadge *= factor;
+                gapTitle *= factor;
+                gapSub *= factor;
+                gapCount *= factor;
+                gapBar *= factor;
+                gapTip *= factor;
+
+                totalStackHeight = badgeDiameter + gapBadge
+                                 + titleSize.Height + gapTitle
+                                 + subSize.Height + gapSub
+                                 + countSize.Height + gapCount
+                                 + barHeight + gapBar
+                                 + tipBoxHeight + gapTip
+                                 + noteSize.Height;
             }
 
-            // 2. Title: LOOK AWAY
-            using (var titleFont = new Font("Segoe UI", 40, FontStyle.Bold))
+            // 6. Starting Y coordinate (centered vertically)
+            float currentY = Math.Max(16f * dpiScale, (clientH - totalStackHeight) / 2f);
+
+            // 7. Sequential rendering (Mathematical guarantee: zero overlapping!)
+
+            // [1] Vector Eye Badge
+            DrawEyeBadge(g, centerX, currentY + badgeDiameter / 2f, badgeDiameter);
+            currentY += badgeDiameter + gapBadge;
+
+            // [2] Title
             using (var titleBrush = new SolidBrush(Color.FromArgb(97, 175, 239))) // Cyan #61AFEF
             {
-                var titleSize = g.MeasureString("LOOK AWAY", titleFont);
-                g.DrawString("LOOK AWAY", titleFont, titleBrush, centerX - titleSize.Width / 2, centerY - 120);
+                g.DrawString(titleText, titleFont, titleBrush, centerX - titleSize.Width / 2f, currentY);
             }
+            currentY += titleSize.Height + gapTitle;
 
-            // 3. Subtitle
-            using (var subFont = new Font("Segoe UI", 16, FontStyle.Regular))
+            // [3] Subtitle
             using (var subBrush = new SolidBrush(Color.FromArgb(229, 192, 123))) // Warm Gold #E5C07B
             {
-                string subText = "Look at an object at least 20 feet (6 meters) away";
-                var subSize = g.MeasureString(subText, subFont);
-                g.DrawString(subText, subFont, subBrush, centerX - subSize.Width / 2, centerY - 55);
+                g.DrawString(subText, subFont, subBrush, centerX - subSize.Width / 2f, currentY);
             }
+            currentY += subSize.Height + gapSub;
 
-            // 4. Countdown Number
-            using (var countFont = new Font("Segoe UI", 48, FontStyle.Bold))
-            using (var countBrush = new SolidBrush(Color.FromArgb(152, 195, 121))) // Calming Green #98C379
+            // [4] Countdown Number
+            using (var countBrush = new SolidBrush(Color.FromArgb(152, 195, 121))) // Mint Green #98C379
             {
-                string countText = $"{remainingSeconds}s";
-                var countSize = g.MeasureString(countText, countFont);
-                g.DrawString(countText, countFont, countBrush, centerX - countSize.Width / 2, centerY - 5);
+                var actualCountSize = g.MeasureString(countText, countFont);
+                g.DrawString(countText, countFont, countBrush, centerX - actualCountSize.Width / 2f, currentY);
             }
+            currentY += countSize.Height + gapCount;
 
-            // 5. Progress Bar
-            int barWidth = 380;
-            int barHeight = 8;
-            int barX = centerX - barWidth / 2;
-            int barY = centerY + 75;
-
-            // Background Bar
-            using (var bgBarBrush = new SolidBrush(Color.FromArgb(40, 44, 58)))
+            // [5] Progress Bar
+            float barX = centerX - barWidth / 2f;
+            using (var bgBarBrush = new SolidBrush(Color.FromArgb(35, 40, 54)))
             {
-                FillRoundedRectangle(g, bgBarBrush, barX, barY, barWidth, barHeight, 4);
+                FillRoundedRectangle(g, bgBarBrush, barX, currentY, barWidth, barHeight, 4f * dpiScale);
             }
-
-            // Filled Bar
             float fraction = totalBreakSeconds > 0 ? (float)remainingSeconds / totalBreakSeconds : 0f;
-            int fillWidth = Math.Max(0, (int)(barWidth * fraction));
-            if (fillWidth > 0)
+            float fillWidth = Math.Max(0f, barWidth * fraction);
+            if (fillWidth > 0f)
             {
                 using var fillBrush = new SolidBrush(Color.FromArgb(152, 195, 121));
-                FillRoundedRectangle(g, fillBrush, barX, barY, fillWidth, barHeight, 4);
+                FillRoundedRectangle(g, fillBrush, barX, currentY, fillWidth, barHeight, 4f * dpiScale);
+            }
+            currentY += barHeight + gapBar;
+
+            // [6] Tip Box Card
+            float tipBoxX = centerX - tipBoxWidth / 2f;
+            float tipBoxY = currentY;
+            using (var tipBgBrush = new SolidBrush(Color.FromArgb(18, 22, 32)))
+            using (var tipBorderPen = new Pen(Color.FromArgb(36, 44, 64), 1f))
+            {
+                FillRoundedRectangle(g, tipBgBrush, tipBoxX, tipBoxY, tipBoxWidth, tipBoxHeight, 10f * dpiScale);
+                DrawRoundedRectangle(g, tipBorderPen, tipBoxX, tipBoxY, tipBoxWidth, tipBoxHeight, 10f * dpiScale);
             }
 
-            // 6. Tip Box
-            int tipBoxWidth = 560;
-            int tipBoxHeight = 75;
-            int tipBoxX = centerX - tipBoxWidth / 2;
-            int tipBoxY = centerY + 110;
-
-            using (var tipBgBrush = new SolidBrush(Color.FromArgb(20, 23, 34)))
-            using (var tipBorderPen = new Pen(Color.FromArgb(35, 39, 56), 1f))
+            // Tip Tag
+            using (var tipTagBrush = new SolidBrush(Color.FromArgb(86, 182, 194))) // Cyan #56B6C2
             {
-                FillRoundedRectangle(g, tipBgBrush, tipBoxX, tipBoxY, tipBoxWidth, tipBoxHeight, 10);
-                DrawRoundedRectangle(g, tipBorderPen, tipBoxX, tipBoxY, tipBoxWidth, tipBoxHeight, 10);
+                g.DrawString("💡 EYE CARE TIP", tipTagFont, tipTagBrush, centerX - tipTagSize.Width / 2f, tipBoxY + tipPaddingY);
             }
 
-            // Tip Title
-            using (var tipTitleFont = new Font("Segoe UI", 9, FontStyle.Bold))
-            using (var tipTitleBrush = new SolidBrush(Color.FromArgb(86, 182, 194))) // Cyan #56B6C2
+            // Tip Body Text
+            using (var tipBrush = new SolidBrush(Color.FromArgb(220, 224, 232)))
+            using (var sf = new StringFormat
             {
-                string tipTitle = "💡 EYE CARE TIP";
-                var size = g.MeasureString(tipTitle, tipTitleFont);
-                g.DrawString(tipTitle, tipTitleFont, tipTitleBrush, centerX - size.Width / 2, tipBoxY + 12);
-            }
-
-            // Tip Text
-            using (var tipFont = new Font("Segoe UI", 11, FontStyle.Regular))
-            using (var tipBrush = new SolidBrush(Color.FromArgb(215, 219, 227)))
+                Alignment = StringAlignment.Center,
+                LineAlignment = StringAlignment.Near,
+                Trimming = StringTrimming.Word
+            })
             {
-                var sf = new StringFormat
-                {
-                    Alignment = StringAlignment.Center,
-                    LineAlignment = StringAlignment.Center
-                };
-                var textRect = new RectangleF(tipBoxX + 15, tipBoxY + 30, tipBoxWidth - 30, tipBoxHeight - 35);
+                var textRect = new RectangleF(
+                    tipBoxX + tipPaddingX,
+                    tipBoxY + tipPaddingY + tipTagSize.Height + (5f * dpiScale),
+                    tipTextWidth,
+                    tipTextSize.Height + (4f * dpiScale)
+                );
                 g.DrawString(currentTip, tipFont, tipBrush, textRect, sf);
             }
+            currentY += tipBoxHeight + gapTip;
 
-            // 7. Screen lock enforcement note
-            using (var noteFont = new Font("Segoe UI", 9, FontStyle.Regular))
-            using (var noteBrush = new SolidBrush(Color.FromArgb(108, 115, 130)))
+            // [7] Enforcement Note
+            using (var noteBrush = new SolidBrush(Color.FromArgb(115, 122, 138)))
             {
-                string noteText = "Screen locked for 20 seconds to enforce healthy rest • 20-20-20 Rule";
-                var noteSize = g.MeasureString(noteText, noteFont);
-                g.DrawString(noteText, noteFont, noteBrush, centerX - noteSize.Width / 2, centerY + 210);
+                g.DrawString(noteText, noteFont, noteBrush, centerX - noteSize.Width / 2f, currentY);
             }
         }
 
-        private static void FillRoundedRectangle(Graphics g, Brush brush, int x, int y, int width, int height, int radius)
+        private static void DrawEyeBadge(Graphics g, float cx, float cy, float diameter)
+        {
+            float radius = diameter / 2f;
+            float x = cx - radius;
+            float y = cy - radius;
+
+            // 1. Subtle Outer Glow Ring
+            using (var glowPen = new Pen(Color.FromArgb(35, 97, 175, 239), 2f))
+            {
+                g.DrawEllipse(glowPen, x - 2, y - 2, diameter + 4, diameter + 4);
+            }
+
+            // 2. Badge Dark Background
+            using (var badgeBrush = new SolidBrush(Color.FromArgb(16, 20, 32)))
+            using (var borderPen = new Pen(Color.FromArgb(42, 52, 78), 1.5f))
+            {
+                g.FillEllipse(badgeBrush, x, y, diameter, diameter);
+                g.DrawEllipse(borderPen, x, y, diameter, diameter);
+            }
+
+            // 3. Stylized Eye Shape
+            float eyeW = diameter * 0.58f;
+            float eyeH = diameter * 0.30f;
+            float eyeLeft = cx - eyeW / 2f;
+            float eyeRight = cx + eyeW / 2f;
+
+            using (var eyePath = new GraphicsPath())
+            {
+                eyePath.AddBezier(
+                    eyeLeft, cy,
+                    cx - eyeW * 0.25f, cy - eyeH,
+                    cx + eyeW * 0.25f, cy - eyeH,
+                    eyeRight, cy
+                );
+                eyePath.AddBezier(
+                    eyeRight, cy,
+                    cx + eyeW * 0.25f, cy + eyeH,
+                    cx - eyeW * 0.25f, cy + eyeH,
+                    eyeLeft, cy
+                );
+                eyePath.CloseFigure();
+
+                using (var scleraBrush = new SolidBrush(Color.FromArgb(28, 97, 175, 239)))
+                {
+                    g.FillPath(scleraBrush, eyePath);
+                }
+
+                using (var eyePen = new Pen(Color.FromArgb(97, 175, 239), 2f))
+                {
+                    eyePen.StartCap = LineCap.Round;
+                    eyePen.EndCap = LineCap.Round;
+                    g.DrawPath(eyePen, eyePath);
+                }
+            }
+
+            // 4. Iris
+            float irisRadius = eyeH * 0.85f;
+            using (var irisBrush = new SolidBrush(Color.FromArgb(70, 155, 225)))
+            {
+                g.FillEllipse(irisBrush, cx - irisRadius, cy - irisRadius, irisRadius * 2f, irisRadius * 2f);
+            }
+
+            // 5. Pupil
+            float pupilRadius = irisRadius * 0.55f;
+            using (var pupilBrush = new SolidBrush(Color.FromArgb(152, 195, 121)))
+            {
+                g.FillEllipse(pupilBrush, cx - pupilRadius, cy - pupilRadius, pupilRadius * 2f, pupilRadius * 2f);
+            }
+
+            // 6. Light Reflection
+            float reflectRadius = pupilRadius * 0.35f;
+            float reflectX = cx + pupilRadius * 0.25f;
+            float reflectY = cy - pupilRadius * 0.35f;
+            using (var reflectBrush = new SolidBrush(Color.FromArgb(245, 255, 255, 255)))
+            {
+                g.FillEllipse(reflectBrush, reflectX, reflectY, reflectRadius * 2f, reflectRadius * 2f);
+            }
+        }
+
+        private static void FillRoundedRectangle(Graphics g, Brush brush, float x, float y, float width, float height, float radius)
         {
             using var path = CreateRoundedRectanglePath(x, y, width, height, radius);
             g.FillPath(brush, path);
         }
 
-        private static void DrawRoundedRectangle(Graphics g, Pen pen, int x, int y, int width, int height, int radius)
+        private static void DrawRoundedRectangle(Graphics g, Pen pen, float x, float y, float width, float height, float radius)
         {
             using var path = CreateRoundedRectanglePath(x, y, width, height, radius);
             g.DrawPath(pen, path);
         }
 
-        private static GraphicsPath CreateRoundedRectanglePath(int x, int y, int width, int height, int radius)
+        private static GraphicsPath CreateRoundedRectanglePath(float x, float y, float width, float height, float radius)
         {
             var path = new GraphicsPath();
-            int diameter = radius * 2;
+            float diameter = radius * 2f;
+            if (diameter > width) diameter = width;
+            if (diameter > height) diameter = height;
+            if (diameter <= 0f)
+            {
+                path.AddRectangle(new RectangleF(x, y, width, height));
+                return path;
+            }
+
             path.AddArc(x, y, diameter, diameter, 180, 90);
             path.AddArc(x + width - diameter, y, diameter, diameter, 270, 90);
             path.AddArc(x + width - diameter, y + height - diameter, diameter, diameter, 0, 90);
@@ -635,6 +830,46 @@ namespace EyeSaver
             }
             base.OnRenderItemText(e);
         }
+
+        protected override void OnRenderArrow(ToolStripArrowRenderEventArgs e)
+        {
+            e.ArrowColor = Color.FromArgb(160, 175, 205);
+            base.OnRenderArrow(e);
+        }
+
+        protected override void OnRenderItemCheck(ToolStripItemImageRenderEventArgs e)
+        {
+            var g = e.Graphics;
+            g.SmoothingMode = SmoothingMode.AntiAlias;
+            var rect = e.ImageRectangle;
+
+            int boxSize = Math.Min(rect.Width, rect.Height) - 2;
+            int boxX = rect.X + (rect.Width - boxSize) / 2;
+            int boxY = rect.Y + (rect.Height - boxSize) / 2;
+
+            using (var checkBrush = new SolidBrush(Color.FromArgb(40, 152, 195, 121)))
+            using (var borderPen = new Pen(Color.FromArgb(152, 195, 121), 1.5f))
+            {
+                g.FillRectangle(checkBrush, boxX, boxY, boxSize, boxSize);
+                g.DrawRectangle(borderPen, boxX, boxY, boxSize, boxSize);
+            }
+
+            using (var checkPen = new Pen(Color.FromArgb(152, 195, 121), 2f))
+            {
+                checkPen.StartCap = LineCap.Round;
+                checkPen.EndCap = LineCap.Round;
+                g.DrawLine(checkPen, boxX + 3, boxY + boxSize / 2, boxX + boxSize / 2 - 1, boxY + boxSize - 4);
+                g.DrawLine(checkPen, boxX + boxSize / 2 - 1, boxY + boxSize - 4, boxX + boxSize - 3, boxY + 4);
+            }
+        }
+
+        protected override void OnRenderSeparator(ToolStripSeparatorRenderEventArgs e)
+        {
+            var g = e.Graphics;
+            int y = e.Item.Height / 2;
+            using var sepPen = new Pen(Color.FromArgb(45, 50, 68), 1f);
+            g.DrawLine(sepPen, 10, y, e.Item.Width - 10, y);
+        }
     }
 
     public class DarkColorTable : ProfessionalColorTable
@@ -644,11 +879,16 @@ namespace EyeSaver
         public override Color ImageMarginGradientMiddle => Color.FromArgb(24, 27, 38);
         public override Color ImageMarginGradientEnd => Color.FromArgb(24, 27, 38);
         public override Color MenuBorder => Color.FromArgb(48, 54, 74);
-        public override Color MenuItemBorder => Color.FromArgb(60, 68, 92);
+        public override Color MenuItemBorder => Color.Transparent;
         public override Color MenuItemSelected => Color.FromArgb(38, 44, 62);
+        public override Color MenuItemSelectedGradientBegin => Color.FromArgb(38, 44, 62);
+        public override Color MenuItemSelectedGradientEnd => Color.FromArgb(38, 44, 62);
         public override Color MenuStripGradientBegin => Color.FromArgb(24, 27, 38);
         public override Color MenuStripGradientEnd => Color.FromArgb(24, 27, 38);
         public override Color SeparatorDark => Color.FromArgb(45, 50, 68);
         public override Color SeparatorLight => Color.Transparent;
+        public override Color CheckBackground => Color.FromArgb(38, 44, 62);
+        public override Color CheckSelectedBackground => Color.FromArgb(48, 56, 78);
+        public override Color CheckPressedBackground => Color.FromArgb(48, 56, 78);
     }
 }
